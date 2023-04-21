@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+
+option go_package = "go-chat-terminal/gen/proto/go_chat_terminal/v1;pb";
+
+
+package go_chat_terminal.v1;
+
+service Terminal {
+    rpc Chat (ChatRequest) returns (stream ChatReply) {}
+}
+
+message ChatRequest {
+    string question = 1;
+}
+
+
+message ChatReply {
+    string answer = 1;
+}
+
+

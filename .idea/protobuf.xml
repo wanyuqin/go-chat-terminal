@@ -55,5 +55,23 @@
         <yaml>$USER_HOME$/.cache/buf/v1/module/data/buf.build/grpc-ecosystem/grpc-gateway/febd9e8be39b4f4b878b9c64bcc203fd/buf.yaml</yaml>
       </module>
     </libraries>
+    <modules>
+      <module>
+        <path>$PROJECT_DIR$</path>
+        <yaml>$PROJECT_DIR$/buf.yaml</yaml>
+      </module>
+    </modules>
+    <workspaces>
+      <workspace>
+        <path>$PROJECT_DIR$</path>
+        <roots>
+          <root value="$PROJECT_DIR$/proto" />
+        </roots>
+        <yaml>$PROJECT_DIR$/buf.work.yaml</yaml>
+      </workspace>
+    </workspaces>
+  </component>
+  <component name="BufSettings">
+    <option name="path" value="$USER_HOME$/go/bin/buf" />
   </component>
 </project>
