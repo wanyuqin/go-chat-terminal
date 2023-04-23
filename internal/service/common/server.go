@@ -8,8 +8,8 @@ import (
 	"google.golang.org/grpc"
 
 	pb "go-chat-terminal/gen/proto/v1"
-	"go-chat-terminal/server"
-	"go-chat-terminal/service"
+	"go-chat-terminal/internal/server"
+	"go-chat-terminal/internal/service"
 )
 
 type ServerImpl struct {

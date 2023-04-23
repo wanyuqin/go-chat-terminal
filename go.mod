@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/derekparker/trie v0.0.0-20221221181808-1424fce0c981
+	github.com/fatih/color v1.15.0
 	github.com/peterh/liner v1.2.2
 	github.com/sashabaranov/go-openai v1.8.0
 	github.com/spf13/cobra v1.7.0
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	github.com/fatih/color v1.15.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

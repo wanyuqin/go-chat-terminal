@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"os"
 	"sync"
 
 	"github.com/sashabaranov/go-openai"
+
+	"go-chat-terminal/config"
 )
 
 type ConversationBody struct {
@@ -26,6 +26,8 @@ func NewConversationBody(content string) ConversationBody {
 
 type Conversion struct {
 	Body []ConversationBody `json:"body"`
+
+	Answer []string
 }
 
 var (
@@ -58,7 +60,7 @@ func (c *Conversion) GetBody() []ConversationBody {
 }
 
 func (c *Conversion) Chat() {
-	key := os.Getenv("CHAT_KEY")
+	key := config.GetConfig().OpenAIKey
 	if key == "" {
 		return
 	}
@@ -88,7 +90,6 @@ func (c *Conversion) Chat() {
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
-			fmt.Println("\n按回车继续....")
 			return
 		}
 
@@ -96,12 +97,8 @@ func (c *Conversion) Chat() {
 			fmt.Printf("\nStream error: %v\n", err)
 			return
 		}
-		// 发送消息
-		if err != nil {
-			log.Println(err)
-			return
-		}
 
-		fmt.Printf(response.Choices[0].Delta.Content)
+		c.Answer = append(c.Answer, response.Choices[0].Delta.Content)
+
 	}
 }

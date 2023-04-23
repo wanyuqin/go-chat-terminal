@@ -15,10 +15,10 @@ import (
 
 	"go-chat-terminal/config"
 	pb "go-chat-terminal/gen/proto/v1"
-	"go-chat-terminal/service"
-	"go-chat-terminal/service/common"
-	"go-chat-terminal/terminal"
-	"go-chat-terminal/terminal/colorize"
+	service2 "go-chat-terminal/internal/service"
+	"go-chat-terminal/internal/service/common"
+	"go-chat-terminal/internal/terminal"
+	"go-chat-terminal/internal/terminal/colorize"
 )
 
 var (
@@ -32,11 +32,11 @@ var startCommand = &cobra.Command{
 	Long: "启动一个与ChatGPT的对话,默认会监听8888端口，可以通过 port来指定启动端口，\n" +
 		"同时关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定",
 	PreRunE: preRunE,
-	Run:     daemonStart,
+	Run:     start,
 }
 
 func init() {
-	startCommand.Flags().StringVarP(&key, "key", "k", "", "关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定")
+	startCommand.PersistentFlags().StringVarP(&key, "key", "k", "", "关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定")
 	startCommand.Flags().Int64VarP(&port, "port", "p", 8888, "grpc listening port")
 	rootCmd.AddCommand(startCommand)
 }
@@ -50,14 +50,10 @@ var logo = "\n ██████╗        ██████╗██╗  █�
 	"                                             \n"
 
 func preRunE(cmd *cobra.Command, args []string) error {
-	if key == "" && os.Getenv("GCHAT_KEY") == "" {
-		return errors.New("unknown openai key")
+	err := checkKey()
+	if err != nil {
+		return err
 	}
-
-	if key == "" {
-		key = os.Getenv("GCHAT_KEY")
-	}
-
 	fmt.Println(logo)
 
 	cfg := config.GetConfig()
@@ -71,17 +67,29 @@ func preRunE(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func daemonStart(cmd *cobra.Command, args []string) {
+func checkKey() error {
+	if key == "" && os.Getenv("GCHAT_KEY") == "" {
+		return errors.New("unknown openai key")
+	}
+
+	if key == "" {
+		key = os.Getenv("GCHAT_KEY")
+	}
+
+	return nil
+
+}
+
+func start(cmd *cobra.Command, args []string) {
 	status := func() int {
 		return execute()
 	}()
-
 	os.Exit(status)
 
 }
 
 func execute() int {
-	var server service.Server
+	var server service2.Server
 
 	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", config.GetConfig().Port))
 	if err != nil {
@@ -91,7 +99,7 @@ func execute() int {
 
 	defer lis.Close()
 	server = common.NewServerImpl(
-		&service.Config{
+		&service2.Config{
 			Listener: lis,
 		})
 

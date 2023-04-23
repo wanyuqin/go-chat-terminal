@@ -8,8 +8,8 @@ import (
 	"text/tabwriter"
 
 	pb "go-chat-terminal/gen/proto/v1"
-	"go-chat-terminal/server"
-	"go-chat-terminal/terminal/colorize"
+	"go-chat-terminal/internal/server"
+	"go-chat-terminal/internal/terminal/colorize"
 )
 
 type Commands struct {

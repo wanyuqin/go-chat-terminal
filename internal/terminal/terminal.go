@@ -189,6 +189,9 @@ func (t *Term) SaveConversion(args string) error {
 	_, err := os.Stat(args)
 
 	var file *os.File
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		return err
+	}
 
 	if errors.Is(err, os.ErrNotExist) {
 		file, err = os.OpenFile(args, os.O_WRONLY|os.O_CREATE, 0666)
