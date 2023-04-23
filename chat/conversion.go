@@ -12,8 +12,6 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-var defaultKey = "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"
-
 type ConversationBody struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -62,7 +60,7 @@ func (c *Conversion) GetBody() []ConversationBody {
 func (c *Conversion) Chat() {
 	key := os.Getenv("CHAT_KEY")
 	if key == "" {
-		key = defaultKey
+		return
 	}
 	client := openai.NewClient(key)
 	ctx := context.Background()

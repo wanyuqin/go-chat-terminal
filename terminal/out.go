@@ -25,6 +25,12 @@ func (t *transcriptWriter) CloseTranscript() error {
 	return nil
 }
 
+func (t *transcriptWriter) Echo(str string) {
+	if t.file != nil {
+		t.file.WriteString(str)
+	}
+}
+
 type pagingWriter struct {
 	mode     int
 	w        io.Writer

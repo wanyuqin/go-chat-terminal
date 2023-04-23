@@ -8,6 +8,7 @@ package go_chat_terminal.v1;
 
 service Terminal {
     rpc Chat (ChatRequest) returns (stream ChatReply) {}
+    rpc Refresh (RefreshRequest) returns (RefreshReply);
 }
 
 message ChatRequest {
@@ -20,3 +21,7 @@ message ChatReply {
 }
 
 
+
+message RefreshRequest {}
+
+message RefreshReply {}

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"log"
 	"net"
 
@@ -37,6 +38,11 @@ func (s *ServerImpl) Run() error {
 }
 
 func (s *ServerImpl) Stop() error {
-	// TODO implement me
-	panic("implement me")
+	err := s.listener.Close()
+	if err != nil {
+		fmt.Println(err)
+		return err
+
+	}
+	return nil
 }

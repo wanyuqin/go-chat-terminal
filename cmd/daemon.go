@@ -2,49 +2,76 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"go-chat-terminal/config"
 	pb "go-chat-terminal/gen/proto/v1"
 	"go-chat-terminal/service"
 	"go-chat-terminal/service/common"
 	"go-chat-terminal/terminal"
+	"go-chat-terminal/terminal/colorize"
+)
+
+var (
+	key  string // openAI key
+	port int64  // grpc port
 )
 
 var startCommand = &cobra.Command{
-	Use: "start",
-	Run: daemonStart,
+	Use:   "start",
+	Short: "启动一个与ChatGPT的对话",
+	Long: "启动一个与ChatGPT的对话,默认会监听8888端口，可以通过 port来指定启动端口，\n" +
+		"同时关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定",
+	PreRunE: preRunE,
+	Run:     daemonStart,
 }
 
 func init() {
+	startCommand.Flags().StringVarP(&key, "key", "k", "", "关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定")
+	startCommand.Flags().Int64VarP(&port, "port", "p", 8888, "grpc listening port")
 	rootCmd.AddCommand(startCommand)
 }
 
-func daemonStart(cmd *cobra.Command, args []string) {
-	// reader := bufio.NewReader(os.Stdin)
-	//
-	// fmt.Println("终端GPT！")
-	//
-	// for {
-	// 	fmt.Print("请输入一段文本：")
-	// 	text, _ := reader.ReadString('\n')
-	// 	chat.GetInstance().SetMessage(text).Chat()
-	// 	input, _ := reader.ReadString('\n')
-	// 	if input == "n\n" {
-	// 		break
-	// 	}
-	// }
-	//
-	// fmt.Println("程序结束！")
+var logo = "\n ██████╗        ██████╗██╗  ██╗ █████╗ ████████╗\n" +
+	"██╔════╝       ██╔════╝██║  ██║██╔══██╗╚══██╔══╝\n" +
+	"██║  ███╗█████╗██║     ███████║███████║   ██║   \n" +
+	"██║   ██║╚════╝██║     ██╔══██║██╔══██║   ██║   \n" +
+	"╚██████╔╝      ╚██████╗██║  ██║██║  ██║   ██║   \n " +
+	"╚═════╝        ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   \n   " +
+	"                                             \n"
 
+func preRunE(cmd *cobra.Command, args []string) error {
+	if key == "" && os.Getenv("GCHAT_KEY") == "" {
+		return errors.New("unknown openai key")
+	}
+
+	if key == "" {
+		key = os.Getenv("GCHAT_KEY")
+	}
+
+	fmt.Println(logo)
+
+	cfg := config.GetConfig()
+	cfg.OpenAIKey = key
+	cfg.Port = port
+
+	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("OpenAI Key: %s\n", key)))
+	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("Grpc port: %d\n", port)))
+	fmt.Println()
+
+	return nil
+}
+
+func daemonStart(cmd *cobra.Command, args []string) {
 	status := func() int {
 		return execute()
 	}()
@@ -53,18 +80,14 @@ func daemonStart(cmd *cobra.Command, args []string) {
 
 }
 
-var defaultPort = 8888
-var defaultAddr = "localhost:8888"
-
 func execute() int {
 	var server service.Server
 
-	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", defaultPort))
+	lis, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", config.GetConfig().Port))
 	if err != nil {
 		log.Fatal(err)
 		return 1
 	}
-	fmt.Printf("tcp :%s start \n", lis.Addr())
 
 	defer lis.Close()
 	server = common.NewServerImpl(
@@ -84,8 +107,7 @@ func execute() int {
 	tc := pb.NewTerminalClient(conn)
 
 	defer conn.Close()
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
+	ctx := context.Background()
 
 	t := terminal.New()
 	t.SetTerminalClient(tc).SetContext(ctx).SetConn(conn)
@@ -95,7 +117,9 @@ func execute() int {
 		if !strings.Contains(err.Error(), "exited") {
 			return 1
 		}
+		server.Stop()
 		return 0
 	}
+
 	return status
 }
