@@ -1,0 +1,4 @@
+# openAI key 配置
+open_ai_key: ""
+# 服务启动监听的端口
+port: 8111

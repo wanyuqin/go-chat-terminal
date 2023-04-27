@@ -38,7 +38,7 @@ var startCommand = &cobra.Command{
 func init() {
 	startCommand.PersistentFlags().StringVarP(&key, "key", "k", "", "关于OpenAI Key, 你可以通过key 来指定，或者添加环境变量GCHAT_KEY来进行指定")
 	startCommand.Flags().Int64VarP(&port, "port", "p", 8888, "grpc listening port")
-	rootCmd.AddCommand(startCommand)
+	// rootCmd.AddCommand(startCommand)
 }
 
 var logo = "\n ██████╗        ██████╗██╗  ██╗ █████╗ ████████╗\n" +
@@ -50,19 +50,19 @@ var logo = "\n ██████╗        ██████╗██╗  █�
 	"                                             \n"
 
 func preRunE(cmd *cobra.Command, args []string) error {
-	err := checkKey()
-	if err != nil {
-		return err
-	}
-	fmt.Println(logo)
-
-	cfg := config.GetConfig()
-	cfg.OpenAIKey = key
-	cfg.Port = port
-
-	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("OpenAI Key: %s\n", key)))
-	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("Grpc port: %d\n", port)))
-	fmt.Println()
+	// err := checkKey()
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println(logo)
+	//
+	// cfg := config.GetConfig()
+	// cfg.OpenAIKey = key
+	// cfg.Port = port
+	//
+	// fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("OpenAI Key: %s\n", key)))
+	// fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("Grpc port: %d\n", port)))
+	// fmt.Println()
 
 	return nil
 }
@@ -81,6 +81,11 @@ func checkKey() error {
 }
 
 func start(cmd *cobra.Command, args []string) {
+	fmt.Println(logo)
+	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("OpenAI Key: %s\n", config.GetConfig().OpenAIKey)))
+	fmt.Printf(colorize.FgHiGreen(fmt.Sprintf("Grpc port: %d\n", config.GetConfig().Port)))
+	fmt.Println()
+
 	status := func() int {
 		return execute()
 	}()

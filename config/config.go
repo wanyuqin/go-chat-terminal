@@ -5,9 +5,9 @@ import "sync"
 type Config struct {
 	logo string
 
-	OpenAIKey string
+	OpenAIKey string `yaml:"open_ai_key"`
 
-	Port int64
+	Port int64 `yaml:"port"`
 }
 
 var (
